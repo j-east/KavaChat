@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KavaChat - OpenRouter Chat</title>
+  <style>
+    :root {
+      --retro-bg: #0a0e27;
+      --retro-bg-light: #141b3d;
+      --retro-cyan: #00d9ff;
+      --retro-cyan-glow: #00ffff;
+      --retro-salmon: #ff6b9d;
+      --retro-gold: #ffd700;
+      --retro-purple: #9d4edd;
+      --retro-border: rgba(0, 217, 255, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', 'Consolas', monospace;
+      background: var(--retro-bg);
+      background-image:
+        linear-gradient(rgba(0, 217, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 217, 255, 0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      color: var(--retro-cyan);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.15),
+          rgba(0, 0, 0, 0.15) 1px,
+          transparent 1px,
+          transparent 2px
+        );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    header {
+      background: var(--retro-bg-light);
+      padding: 1rem;
+      border-bottom: 2px solid var(--retro-cyan);
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--retro-gold);
+      text-shadow:
+        0 0 10px var(--retro-gold),
+        0 0 20px var(--retro-gold),
+        0 0 30px rgba(255, 215, 0, 0.5);
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    .auth-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info {
+      font-size: 0.9rem;
+      color: var(--retro-cyan);
+      text-shadow: 0 0 5px var(--retro-cyan-glow);
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--retro-salmon), var(--retro-purple));
+      color: white;
+      border: 2px solid var(--retro-salmon);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+      box-shadow:
+        0 0 10px rgba(255, 107, 157, 0.5),
+        inset 0 0 10px rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, var(--retro-purple), var(--retro-salmon));
+      box-shadow:
+        0 0 20px rgba(255, 107, 157, 0.8),
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      background: #333;
+      border-color: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #333, #555);
+      border-color: #666;
+      box-shadow: 0 0 10px rgba(100, 100, 100, 0.5);
+    }
+
+    .logout-btn:hover {
+      background: linear-gradient(135deg, #555, #777);
+      box-shadow: 0 0 15px rgba(150, 150, 150, 0.7);
+    }
+
+    .controls {
+      background: var(--retro-bg-light);
+      padding: 1rem;
+      border-bottom: 1px solid var(--retro-border);
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .controls label {
+      color: var(--retro-gold);
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+
+    select {
+      flex: 1;
+      padding: 0.6rem;
+      background: var(--retro-bg);
+      color: var(--retro-cyan);
+      border: 2px solid var(--retro-cyan);
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-family: 'Courier New', monospace;
+      box-shadow:
+        inset 0 0 10px rgba(0, 217, 255, 0.2),
+        0 0 10px rgba(0, 217, 255, 0.3);
+    }
+
+    select:focus {
+      outline: none;
+      box-shadow:
+        inset 0 0 15px rgba(0, 217, 255, 0.3),
+        0 0 20px rgba(0, 255, 255, 0.6);
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 1rem 1.2rem;
+      border-radius: 0;
+      line-height: 1.6;
+      position: relative;
+      font-family: 'Courier New', monospace;
+      border: 2px solid;
+    }
+
+    .message.user {
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.2), rgba(157, 78, 221, 0.2));
+      border-color: var(--retro-salmon);
+      align-self: flex-end;
+      color: var(--retro-salmon);
+      box-shadow:
+        0 0 20px rgba(255, 107, 157, 0.4),
+        inset 0 0 20px rgba(255, 107, 157, 0.1);
+    }
+
+    .message.assistant {
+      background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(0, 255, 255, 0.05));
+      border-color: var(--retro-cyan);
+      align-self: flex-start;
+      color: var(--retro-cyan);
+      box-shadow:
+        0 0 20px rgba(0, 217, 255, 0.3),
+        inset 0 0 20px rgba(0, 217, 255, 0.05);
+    }
+
+    .message.error {
+      background: rgba(255, 107, 157, 0.3);
+      border-color: var(--retro-salmon);
+      color: white;
+      align-self: center;
+      max-width: 90%;
+      box-shadow: 0 0 30px rgba(255, 107, 157, 0.6);
+    }
+
+    .input-container {
+      background: var(--retro-bg-light);
+      padding: 1rem;
+      border-top: 2px solid var(--retro-cyan);
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    textarea {
+      flex: 1;
+      background: var(--retro-bg);
+      color: var(--retro-cyan);
+      border: 2px solid var(--retro-border);
+      border-radius: 0;
+      padding: 0.75rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      resize: none;
+      min-height: 60px;
+      box-shadow: inset 0 0 15px rgba(0, 217, 255, 0.1);
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--retro-cyan);
+      box-shadow:
+        inset 0 0 20px rgba(0, 217, 255, 0.2),
+        0 0 15px rgba(0, 255, 255, 0.5);
+    }
+
+    textarea::placeholder {
+      color: rgba(0, 217, 255, 0.5);
+    }
+
+    .send-btn {
+      align-self: flex-end;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--retro-gold);
+      text-shadow: 0 0 10px var(--retro-gold);
+    }
+
+    .welcome {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--retro-cyan);
+      max-width: 700px;
+      margin: auto;
+      border: 2px solid var(--retro-cyan);
+      background: linear-gradient(135deg, rgba(0, 217, 255, 0.05), rgba(157, 78, 221, 0.05));
+      box-shadow:
+        0 0 30px rgba(0, 217, 255, 0.3),
+        inset 0 0 30px rgba(0, 217, 255, 0.05);
+    }
+
+    .welcome h2 {
+      margin-bottom: 1.5rem;
+      color: var(--retro-gold);
+      font-size: 2rem;
+      text-shadow:
+        0 0 10px var(--retro-gold),
+        0 0 20px var(--retro-gold),
+        0 0 30px rgba(255, 215, 0, 0.5);
+      letter-spacing: 3px;
+    }
+
+    .welcome p {
+      text-shadow: 0 0 5px rgba(0, 217, 255, 0.8);
+      line-height: 1.8;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--retro-bg);
+      border-left: 1px solid var(--retro-border);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--retro-cyan);
+      box-shadow: 0 0 10px var(--retro-cyan-glow);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--retro-cyan-glow);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>KavaChat</h1>
+    <div class="auth-section">
+      <span class="user-info hidden" id="userInfo"></span>
+      <button id="authBtn">Login with OpenRouter</button>
+      <button class="logout-btn hidden" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <div class="controls hidden" id="controls">
+    <label for="modelSelect">Model:</label>
+    <select id="modelSelect">
+      <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+      <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+      <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+      <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+      <option value="google/gemini-pro">Gemini Pro</option>
+      <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+    </select>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div class="welcome" id="welcome">
+      <h2>Welcome to KavaChat</h2>
+      <p>Please login with OpenRouter to start chatting. Once authenticated, select a model and start a conversation.</p>
+    </div>
+  </div>
+
+  <div class="input-container hidden" id="inputContainer">
+    <textarea id="messageInput" placeholder="Type your message..."></textarea>
+    <button class="send-btn" id="sendBtn">Send</button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
