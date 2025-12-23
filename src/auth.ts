@@ -32,6 +32,9 @@ export async function initiateLogin(): Promise<void> {
   const callbackUrl = window.location.origin + window.location.pathname;
   const authUrl = `https://openrouter.ai/auth?callback_url=${encodeURIComponent(callbackUrl)}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
 
+  console.log('Initiating login with callback URL:', callbackUrl);
+  console.log('Auth URL:', authUrl);
+
   window.location.href = authUrl;
 }
 

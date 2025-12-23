@@ -15,8 +15,14 @@ async function initialize(): Promise<void> {
   }
 
   const authBtn = document.getElementById('authBtn');
-  authBtn?.addEventListener('click', () => {
-    initiateLogin();
+  authBtn?.addEventListener('click', async () => {
+    console.log('Login button clicked');
+    try {
+      await initiateLogin();
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
   });
 
   const logoutBtn = document.getElementById('logoutBtn');
