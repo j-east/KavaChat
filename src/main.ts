@@ -1,10 +1,15 @@
 import { isAuthenticated, initiateLogin, handleCallback, logout } from './auth';
-import { sendMessage } from './chat';
-import { ChatUI, showAuthenticatedUI, showUnauthenticatedUI } from './ui';
+import { sendMessage, getAvailableModels } from './chat';
+import { ChatUI, showAuthenticatedUI, showUnauthenticatedUI, populateModelSelector } from './ui';
 
 const chatUI = new ChatUI();
 
 async function initialize(): Promise<void> {
+  // Load models early, even before authentication
+  console.log('Loading available models...');
+  const models = await getAvailableModels();
+  populateModelSelector(models);
+
   const hasAuthCode = await handleCallback();
 
   if (hasAuthCode || isAuthenticated()) {

@@ -1,4 +1,4 @@
-import { Message } from './chat';
+import { Message, ModelInfo } from './chat';
 
 export class ChatUI {
   private chatContainer: HTMLElement;
@@ -111,4 +111,38 @@ export function showUnauthenticatedUI(): void {
   document.getElementById('authBtn')?.classList.remove('hidden');
   document.getElementById('logoutBtn')?.classList.add('hidden');
   document.getElementById('userInfo')?.classList.add('hidden');
+}
+
+function formatContextLength(tokens: number): string {
+  if (tokens >= 1000000) return `${(tokens / 1000000).toFixed(1)}M`;
+  if (tokens >= 1000) return `${(tokens / 1000).toFixed(0)}K`;
+  return `${tokens}`;
+}
+
+export function populateModelSelector(models: ModelInfo[]): void {
+  const select = document.getElementById('modelSelect') as HTMLSelectElement;
+  if (!select) return;
+
+  select.innerHTML = '';
+
+  let currentProvider = '';
+  models.forEach(model => {
+    if (model.provider !== currentProvider) {
+      if (currentProvider !== '') {
+        const separator = document.createElement('option');
+        separator.disabled = true;
+        separator.textContent = '─────────────────';
+        select.appendChild(separator);
+      }
+      currentProvider = model.provider;
+    }
+
+    const option = document.createElement('option');
+    option.value = model.id;
+    const contextInfo = model.contextLength ? ` [${formatContextLength(model.contextLength)}]` : '';
+    option.textContent = `${model.provider}: ${model.name}${contextInfo}`;
+    select.appendChild(option);
+  });
+
+  console.log(`Loaded ${models.length} models from ${new Set(models.map(m => m.provider)).size} providers`);
 }
