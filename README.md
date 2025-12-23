@@ -1,6 +1,8 @@
 # KavaChat
 
-A frontend-only chat application built with TypeScript that uses the OpenRouter API. Features secure PKCE OAuth authentication and supports multiple AI models.
+A frontend-only chat application built with TypeScript that uses the OpenRouter API. Features secure PKCE OAuth authentication, retrofuture 80s aesthetic, and supports multiple AI models.
+
+**Live Demo:** https://j-east.github.io/KavaChat/
 
 ## Features
 
